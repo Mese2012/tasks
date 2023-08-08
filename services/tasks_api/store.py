@@ -1,7 +1,9 @@
-from uuid import UUID
 import datetime
+from uuid import UUID
+
 import boto3
 from boto3.dynamodb.conditions import Key
+
 from models import Task, TaskStatus
 
 
@@ -38,7 +40,7 @@ class TaskStore:
             owner=record["Item"]["owner"],
             status=TaskStatus[record["Item"]["status"]],
         )
-    
+
     def add(self, task):
         dynamodb = boto3.resource("dynamodb")
         table = dynamodb.Table(self.table_name)
@@ -61,7 +63,9 @@ class TaskStore:
         last_key = None
         query_kwargs = {
             "IndexName": "GS1",
-            "KeyConditionExpression": Key("GS1PK").eq(f"#{owner}#{TaskStatus.OPEN.value}"),
+            "KeyConditionExpression": Key("GS1PK").eq(
+                f"#{owner}#{TaskStatus.OPEN.value}"
+            ),
         }
         tasks = []
         while True:
@@ -84,7 +88,6 @@ class TaskStore:
                 break
 
         return tasks
-    
 
     def list_open(self, owner):
         return self._list_by_status(owner, TaskStatus.OPEN)
@@ -120,5 +123,3 @@ class TaskStore:
             if last_key is None:
                 break
         return tasks
-        
-        
